@@ -14,6 +14,39 @@ A high-performance, lightweight OBS alternative engineered specifically to **str
 
 ---
 
+## ☁️ How to Run 24/7 in the Cloud (Laptop Powered OFF)
+
+To use SkyOBS Studio from your phone even when your laptop is completely turned off or closed, host it on a free/cheap 24/7 cloud server:
+
+### 1. Render.com (100% Free 24/7 Cloud Host)
+1. Double-click `Push_To_GitHub.bat` in `17_SkyStream_Studio/` to push the code to your GitHub.
+2. Go to **[Render.com](https://render.com)** (sign up for free with GitHub).
+3. Click **New + ➔ Web Service** and select `skyobs-studio`.
+4. Render detects the [`Dockerfile`](file:///c:/Users/Richi/OneDrive/Desktop/antigravity/17_SkyStream_Studio/Dockerfile) automatically and builds the container with FFmpeg 7.
+5. Click **Create Web Service**!
+6. Render gives you a permanent HTTPS URL (e.g. `https://skyobs-studio.onrender.com`).
+   * **You can now shut down and unplug your laptop!**
+   * The web app remains live 24/7. Open the link on your phone, upload videos, and stream to YouTube Live anytime!
+
+### 2. Railway.app (1-Click Cloud Run)
+1. Go to **[Railway.app](https://railway.app)**.
+2. Click **New Project ➔ Deploy from GitHub repo ➔ `skyobs-studio`**.
+3. Generates an instant, permanent URL: `https://skyobs-studio.up.railway.app`.
+
+### 3. Dedicated Cloud VPS (Hetzner / DigitalOcean - $4/mo)
+For massive unmetered 24/7 4K streaming channels, run on a $4/mo cloud server:
+```bash
+chmod +x deploy_vps.sh
+./deploy_vps.sh
+```
+Runs as an auto-restarting systemd background service.
+
+---
+
+A high-performance, lightweight OBS alternative engineered specifically to **stream 4K local video files directly to YouTube Live** with NVIDIA hardware acceleration, 24/7 continuous looping, and **full remote control + direct video uploads from any smartphone** (iPhone & Android).
+
+---
+
 ## 🌟 Key Highlights
 
 * **True 4K UHD 60 FPS & 30 FPS**: Real-time 3840x2160 broadcast canvas with automatic letterbox padding (no stretched or distorted aspect ratios).
