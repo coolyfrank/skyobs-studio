@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  skyobs-studio:
+    build: .
+    container_name: skyobs-studio
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./config.json:/app/config.json
+    environment:
+      - PYTHONUNBUFFERED=1

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyOBS Studio — Simple YouTube Video Streamer</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300e676'><circle cx='12' cy='12' r='10'/></svg>">
+</head>
+<body>
+  <div class="app-container">
+    <!-- TOP HEADER -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">SkyOBS Studio</span>
+          <span class="brand-tag">YouTube Video Streamer</span>
+        </div>
+      </div>
+
+      <!-- LIVE STATUS PILL & TIMER -->
+      <div class="header-status-group">
+        <div id="liveStatusBadge" class="status-badge offline">
+          <span class="status-dot"></span>
+          <span id="liveStatusText">OFFLINE</span>
+        </div>
+        <div class="live-timer-container">
+          <span class="timer-label">REC / LIVE</span>
+          <span id="headerTimer" class="timer-digits">00:00:00</span>
+        </div>
+      </div>
+
+      <!-- HEADER ACTIONS -->
+      <div class="header-actions">
+        <button id="phoneLinkBtn" class="btn-icon btn-phone-link" title="Open and control from iPhone or Android">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+          <span>📱 Phone Link</span>
+        </button>
+        <button id="toggleLogsBtn" class="btn-icon" title="View FFmpeg Logs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>Logs</span>
+        </button>
+        <button id="helpBtn" class="btn-icon" title="Quick Setup Guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Help</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN STUDIO 3-COLUMN WORKSPACE -->
+    <main class="studio-workspace">
+      
+      <!-- COLUMN 1: SOURCES & PLAYLIST -->
+      <section class="panel panel-playlist">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="title-icon">
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+              <line x1="7" y1="2" x2="7" y2="22"></line>
+              <line x1="17" y1="2" x2="17" y2="22"></line>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+            </svg>
+            <span>Video Sources</span>
+          </div>
+          <span id="playlistCount" class="badge">0 videos</span>
+        </div>
+
+        <div class="playlist-actions">
+          <button id="addFilesBtn" class="btn btn-primary btn-sm" title="Pick files from PC">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Videos
+          </button>
+          <button id="uploadPhoneBtn" class="btn btn-emerald btn-sm" title="Upload directly from Phone or PC">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            📱 Upload
+          </button>
+          <input type="file" id="mobileFileInput" accept="video/*" multiple class="hidden">
+          <button id="addFolderBtn" class="btn btn-secondary btn-sm" title="Scan entire folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Folder
+          </button>
+        </div>
+
+        <!-- UPLOAD PROGRESS (For phone uploads) -->
+        <div id="uploadProgressBar" class="upload-progress-container hidden">
+          <div class="upload-progress-info">
+            <span id="uploadProgressText">Uploading 4K video...</span>
+            <span id="uploadProgressPercent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="uploadProgressFill" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- DRAG AND DROP ZONE -->
+        <div id="dropZone" class="dropzone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p>Click "Add Videos" or drag files here</p>
+          <span class="subtext">MP4, MKV, MOV, AVI, WEBM, TS</span>
+        </div>
+
+        <!-- PLAYLIST ITEMS CONTAINER -->
+        <div id="playlistContainer" class="playlist-list">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- PLAYLIST CONTROLS FOOTER -->
+        <div class="playlist-footer">
+          <div class="loop-mode-selector">
+            <label class="control-label">Loop Mode:</label>
+            <div class="radio-pill-group">
+              <label class="radio-pill">
+                <input type="radio" name="loopMode" value="playlist" checked>
+                <span>Loop All 🔁</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="loopMode" value="single">
+                <span>Loop One 🔂</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="loopMode" value="none">
+                <span>Play Once ▶</span>
+              </label>
+            </div>
+          </div>
+          <button id="clearPlaylistBtn" class="btn btn-ghost btn-xs" title="Clear all videos from queue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Clear All
+          </button>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: MASTER MONITOR / PROGRAM PREVIEW -->
+      <section class="panel panel-preview">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="title-icon">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Program Monitor</span>
+          </div>
+          <div class="preview-mode-tag" id="previewModeTag">LOCAL PREVIEW</div>
+        </div>
+
+        <!-- VIDEO PLAYER CANVAS -->
+        <div class="video-monitor-wrapper">
+          <div class="video-container" id="videoContainer">
+            <video id="previewPlayer" preload="metadata" playsinline></video>
+            
+            <!-- OVERLAY BADGES -->
+            <div class="monitor-overlay">
+              <div id="monitorLiveTag" class="monitor-live-tag hidden">
+                <span class="live-pulse"></span>
+                <span>🔴 BROADCASTING LIVE</span>
+              </div>
+              <div id="monitorOverlayText" class="monitor-banner-text hidden"></div>
+            </div>
+
+            <!-- EMPTY STATE NOTICE -->
+            <div id="noVideoNotice" class="no-video-notice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+              <h3>No Video Selected</h3>
+              <p>Add a video from your device to preview and stream</p>
+            </div>
+          </div>
+
+          <!-- AUDIO VU METERS (STEREO L / R) -->
+          <div class="audio-vu-meter-bar">
+            <div class="vu-channel">
+              <span class="vu-label">L</span>
+              <div class="vu-track">
+                <div id="vuLeft" class="vu-level" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="vu-channel">
+              <span class="vu-label">R</span>
+              <div class="vu-track">
+                <div id="vuRight" class="vu-level" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIDEO CONTROLS BAR -->
+          <div class="player-controls">
+            <button id="playPauseBtn" class="btn-ctrl" title="Play / Pause">
+              <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
+
+            <!-- SCRUB TIMELINE -->
+            <div class="timeline-container">
+              <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
+            </div>
+
+            <!-- TIME DISPLAY -->
+            <div class="time-display">
+              <span id="currentTime">00:00</span> / <span id="totalDuration">00:00</span>
+            </div>
+
+            <!-- VOLUME SLIDER -->
+            <div class="volume-container">
+              <button id="muteBtn" class="btn-ctrl" title="Mute / Unmute">
+                <svg id="volumeHighIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+              </button>
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1">
+            </div>
+
+            <button id="fullscreenBtn" class="btn-ctrl" title="Fullscreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ACTIVE PLAYING INFO -->
+        <div class="current-track-info">
+          <span class="track-label">NOW PLAYING:</span>
+          <span id="currentVideoName" class="track-name">None</span>
+          <span id="currentVideoSpecs" class="track-specs"></span>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: BROADCAST CONTROLS & SETTINGS -->
+      <section class="panel panel-controls">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="title-icon">
+              <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path>
+              <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path>
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
+              <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path>
+            </svg>
+            <span>YouTube Live Setup</span>
+          </div>
+        </div>
+
+        <div class="controls-form">
+          <!-- STREAM DESTINATION -->
+          <div class="form-group">
+            <label class="form-label" for="rtmpUrl">RTMP Ingest Server</label>
+            <select id="rtmpUrl" class="form-input">
+              <option value="rtmp://a.rtmp.youtube.com/live2">YouTube Live (Primary Server)</option>
+              <option value="rtmp://b.rtmp.youtube.com/live2">YouTube Live (Backup Server)</option>
+              <option value="custom">Custom RTMP Destination...</option>
+            </select>
+            <input type="text" id="customRtmpInput" class="form-input hidden" placeholder="rtmp://custom.server.com/live">
+          </div>
+
+          <!-- STREAM KEY -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label class="form-label" for="streamKey">YouTube Stream Key <span class="req">*</span></label>
+              <a href="https://studio.youtube.com" target="_blank" class="link-helper" title="Open YouTube Studio Live Dashboard">Get Key ↗</a>
+            </div>
+            <div class="password-input-wrapper">
+              <input type="password" id="streamKey" class="form-input" placeholder="Paste your stream key here..." autocomplete="off">
+              <button type="button" id="toggleKeyVisibility" class="btn-toggle-eye" title="Show / Hide Key">
+                👁
+              </button>
+            </div>
+            <span class="field-hint">Never share this key with anyone. It is saved securely on your local device.</span>
+          </div>
+
+          <!-- ENCODING PRESETS -->
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label class="form-label" for="resolutionSelect">Resolution & FPS</label>
+              <select id="resolutionSelect" class="form-input">
+                <option value="4k_60" selected>4K 2160p @ 60 FPS (Ultra HD 60) 🌟</option>
+                <option value="4k_30">4K 2160p @ 30 FPS (Ultra HD 30) 🌟</option>
+                <option value="1440p_60">2K 1440p @ 60 FPS (QHD 60)</option>
+                <option value="1080p_60">1080p @ 60 FPS (FHD 60)</option>
+                <option value="1080p_30">1080p @ 30 FPS (FHD 30)</option>
+                <option value="720p_60">720p @ 60 FPS (HD 60)</option>
+                <option value="720p_30">720p @ 30 FPS (HD 30)</option>
+                <option value="native">Source Resolution (Native)</option>
+              </select>
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="form-label" for="encoderSelect">Encoder Engine</label>
+              <select id="encoderSelect" class="form-input">
+                <option value="hevc_nvenc" selected>NVIDIA HEVC/H.265 (Best for 4K ⚡)</option>
+                <option value="nvenc">NVIDIA H.264 NVENC (GPU ⚡)</option>
+                <option value="x265">CPU x265 (Software HEVC)</option>
+                <option value="x264">CPU x264 (Software)</option>
+                <option value="copy">Direct Copy (Pass-Through)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- BITRATE CONFIG -->
+          <div class="form-group">
+            <div class="label-with-value">
+              <label class="form-label" for="bitrateSlider">Video Bitrate</label>
+              <span id="bitrateDisplay" class="value-badge">30000 kbps (30.0 Mbps)</span>
+            </div>
+            <input type="range" id="bitrateSlider" min="2000" max="55000" step="1000" value="30000" class="range-slider">
+            <div class="slider-ticks">
+              <span>5M (1080p)</span>
+              <span>15M (2K)</span>
+              <span>30M (4K 60 Standard)</span>
+              <span>50M (4K Ultra)</span>
+            </div>
+          </div>
+
+          <!-- ON-SCREEN WATERMARK / BANNER OVERLAY -->
+          <div class="form-group">
+            <label class="form-label" for="overlayTextInput">Live Overlay Text (Optional)</label>
+            <input type="text" id="overlayTextInput" class="form-input" placeholder="e.g. 🔴 24/7 LIVE STREAM | Sky King">
+          </div>
+
+          <!-- MAIN BROADCAST BUTTON -->
+          <div class="broadcast-action-wrapper">
+            <button id="streamActionBtn" class="btn-broadcast">
+              <div class="btn-broadcast-content">
+                <span class="broadcast-icon">🔴</span>
+                <span id="broadcastBtnText">START STREAMING</span>
+              </div>
+              <span id="broadcastSubText" class="broadcast-subtext">Broadcast to YouTube Live</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM LIVE STATUS BAR (OBS-STYLE DOCK) -->
+    <footer class="studio-footer">
+      <div class="telemetry-item">
+        <span class="telemetry-label">STATUS</span>
+        <span id="footerStatus" class="telemetry-value offline">OFFLINE</span>
+      </div>
+      <div class="telemetry-separator"></div>
+
+      <div class="telemetry-item">
+        <span class="telemetry-label">LIVE BITRATE</span>
+        <span id="telemetryBitrate" class="telemetry-value">0 kbps</span>
+      </div>
+      <div class="telemetry-separator"></div>
+
+      <div class="telemetry-item">
+        <span class="telemetry-label">STREAM FPS</span>
+        <span id="telemetryFps" class="telemetry-value">0.0 fps</span>
+      </div>
+      <div class="telemetry-separator"></div>
+
+      <div class="telemetry-item">
+        <span class="telemetry-label">SPEED</span>
+        <span id="telemetrySpeed" class="telemetry-value">0.00x</span>
+      </div>
+      <div class="telemetry-separator"></div>
+
+      <div class="telemetry-item">
+        <span class="telemetry-label">DROPPED FRAMES</span>
+        <span id="telemetryDrops" class="telemetry-value">0 (0.0%)</span>
+      </div>
+      <div class="telemetry-separator"></div>
+
+      <div class="telemetry-item">
+        <span class="telemetry-label">TOTAL TIME</span>
+        <span id="telemetryTime" class="telemetry-value">00:00:00</span>
+      </div>
+      <div class="telemetry-separator"></div>
+
+      <div class="telemetry-item">
+        <span class="telemetry-label">DATA SENT</span>
+        <span id="telemetrySize" class="telemetry-value">0.0 MB</span>
+      </div>
+    </footer>
+
+    <!-- SLIDE-UP LOGS DRAWER -->
+    <div id="logsDrawer" class="logs-drawer hidden">
+      <div class="logs-drawer-header">
+        <div class="drawer-title">
+          <span>FFmpeg Streaming Logs & Diagnostics</span>
+          <span id="logsStatusBadge" class="badge">Live</span>
+        </div>
+        <div class="drawer-actions">
+          <button id="copyLogsBtn" class="btn btn-ghost btn-xs">Copy Logs</button>
+          <button id="closeLogsBtn" class="btn-close-drawer">✕</button>
+        </div>
+      </div>
+      <div id="logsTerminal" class="logs-terminal">
+        <div class="log-line text-muted">[System] Ready to stream local videos to YouTube Live.</div>
+      </div>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION (Visible only on phones) -->
+    <nav class="mobile-nav-bar">
+      <button class="mobile-nav-btn active" data-tab="preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Monitor</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="playlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line></svg>
+        <span>Playlist</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="controls">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><circle cx="12" cy="12" r="2"></circle><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path></svg>
+        <span>4K Setup</span>
+      </button>
+    </nav>
+
+    <!-- PHONE & PUBLIC WEB LINK MODAL -->
+    <div id="phoneModal" class="modal-backdrop hidden">
+      <div class="modal-card modal-card-lg">
+        <div class="modal-header">
+          <h3>🌐 Run SkyOBS Online & On Phones</h3>
+          <button id="closePhoneModal" class="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body text-center">
+          
+          <!-- TAB TOGGLE: PUBLIC LINK VS LOCAL WI-FI -->
+          <div class="link-type-switcher">
+            <button id="tabPublicLink" class="link-tab-btn active">
+              🌐 Global Public Link (Anyone, Anywhere)
+            </button>
+            <button id="tabLocalLink" class="link-tab-btn">
+              🏠 Local Wi-Fi (Home Network)
+            </button>
+          </div>
+
+          <!-- PUBLIC LINK SECTION -->
+          <div id="publicLinkSection" class="link-content-section">
+            <p class="phone-modal-desc">
+              Generate a secure, high-speed public HTTPS link powered by Cloudflare. <strong>Anyone with this link can open SkyOBS on their phone or PC from anywhere in the world</strong> to stream 4K videos!
+            </p>
+
+            <div class="tunnel-action-bar">
+              <button id="startTunnelBtn" class="btn btn-emerald">
+                ⚡ Generate Public Web Link
+              </button>
+              <button id="stopTunnelBtn" class="btn btn-secondary hidden">
+                ✕ Stop Public Link
+              </button>
+            </div>
+
+            <div id="publicLinkBox" class="phone-url-box hidden">
+              <span id="publicUrlText" class="phone-url">Generating public link...</span>
+              <button id="copyPublicUrlBtn" class="btn btn-secondary btn-xs">Copy</button>
+            </div>
+
+            <div class="qr-container">
+              <canvas id="phoneQrCanvas" width="200" height="200" class="qr-canvas"></canvas>
+            </div>
+            
+            <p class="field-hint">No port forwarding or router config needed. 100% free with unlimited 4K streaming bandwidth.</p>
+          </div>
+
+          <!-- LOCAL WI-FI SECTION -->
+          <div id="localLinkSection" class="link-content-section hidden">
+            <p class="phone-modal-desc">
+              Connect directly through your local Wi-Fi network for ultra-fast local uploads.
+            </p>
+            <div class="phone-url-box">
+              <span id="localUrlText" class="phone-url">Loading...</span>
+              <button id="copyLocalUrlBtn" class="btn btn-secondary btn-xs">Copy</button>
+            </div>
+            <div class="phone-instructions">
+              <p><strong>1.</strong> Ensure your phone or device is connected to the same Wi-Fi.</p>
+              <p><strong>2.</strong> Open the link in Safari, Chrome, or any browser.</p>
+              <p><strong>3.</strong> Tap <strong>"📱 Upload"</strong> to stream videos straight from your phone!</p>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="donePhoneBtn" class="btn btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div id="helpModal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>How to Stream Videos to YouTube Live</h3>
+          <button id="closeHelpModal" class="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <ol class="help-steps">
+            <li>
+              <strong>1. Open YouTube Studio:</strong> Go to <a href="https://studio.youtube.com" target="_blank">studio.youtube.com</a> and click <strong>"Go Live"</strong> (top-right).
+            </li>
+            <li>
+              <strong>2. Copy your Stream Key:</strong> Under "Stream Settings", copy your <strong>Default Stream Key</strong> (e.g. <code>xxxx-xxxx-xxxx-xxxx-xxxx</code>).
+            </li>
+            <li>
+              <strong>3. Paste into SkyOBS Studio:</strong> Paste your Stream Key into the "YouTube Stream Key" box on the right.
+            </li>
+            <li>
+              <strong>4. Add Videos from your PC:</strong> Click <strong>"Add Videos"</strong> or <strong>"Add Folder"</strong> to select your local video files.
+            </li>
+            <li>
+              <strong>5. Set Loop Mode:</strong> Choose <strong>"Loop All"</strong> for a continuous 24/7 stream, or <strong>"Loop One"</strong> to repeat a single video.
+            </li>
+            <li>
+              <strong>6. Click "START STREAMING":</strong> SkyOBS Studio will stream your videos directly to YouTube in realtime with zero frame drops!
+            </li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button id="gotItBtn" class="btn btn-primary">Got it, let's stream!</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

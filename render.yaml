@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: skyobs-studio
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 7860
