@@ -1,5 +1,14 @@
 import os
 import sys
+
+# Force UTF-8 encoding on Windows to prevent UnicodeEncodeError crashes
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 import json
 import time
 import shutil
@@ -446,7 +455,7 @@ def start_server_and_ui():
     is_headless = os.environ.get("SPACE_ID") is not None or sys.platform != "win32" or "--server" in sys.argv or "--headless" in sys.argv
     if is_headless:
         print(f"\n=======================================================")
-        print(f"🚀 SkyOBS Studio running in 24/7 Cloud Server Mode on port {port}")
+        print(f"[+] SkyOBS Studio running in 24/7 Cloud Server Mode on port {port}")
         print(f"=======================================================\n")
         uvicorn.run(app, host=host, port=port, log_level="info")
         return
@@ -462,9 +471,9 @@ def start_server_and_ui():
     local_url = f"http://127.0.0.1:{port}"
     phone_url = f"http://{local_ip}:{port}"
     print(f"\n=======================================================")
-    print(f"🚀 SkyOBS Studio 4K Engine is ACTIVE!")
-    print(f"   💻 PC Desktop Access: {local_url}")
-    print(f"   📱 Phone Web Access:  {phone_url}")
+    print(f"[+] SkyOBS Studio 4K Engine is ACTIVE!")
+    print(f"    PC Desktop Access: {local_url}")
+    print(f"    Phone Web Access:  {phone_url}")
     print(f"=======================================================\n")
 
     # Try launching with pywebview for a native desktop application window

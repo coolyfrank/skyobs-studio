@@ -21,10 +21,10 @@ COPY --chown=user . .
 
 RUN mkdir -p uploads
 
-EXPOSE 7860
+# Expose common cloud web ports (Render 10000, Spaces/Colab 7860, local 8765)
+EXPOSE 7860 8765 10000
 
-ENV PORT=7860 \
-    HOST=0.0.0.0 \
+ENV HOST=0.0.0.0 \
     PYTHONUNBUFFERED=1
 
 CMD ["python", "app.py", "--server"]

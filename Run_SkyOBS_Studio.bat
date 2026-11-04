@@ -1,9 +1,10 @@
 @echo off
-title SkyOBS Studio — Simple YouTube Video Streamer
+chcp 65001 >nul
+title SkyOBS Studio - Simple YouTube Video Streamer
 cd /d "%~dp0"
 
 echo ======================================================================
-echo                  🚀 LAUNCHING SKYOBS STUDIO
+echo                  [+] LAUNCHING SKYOBS STUDIO
 echo         OBS-Style Simple YouTube Video Streamer for Local Videos
 echo ======================================================================
 echo.
