@@ -10,6 +10,10 @@ pinned: false
 
 # 🚀 SkyOBS Studio — 4K YouTube Live Video Streamer (Desktop + Phone + 24/7 Cloud)
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/coolyfrank/skyobs-studio/blob/main/SkyOBS_Cloud_Streamer.ipynb)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/coolyfrank/skyobs-studio)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/deploy?template=https://github.com/coolyfrank/skyobs-studio)
+
 A high-performance, lightweight OBS alternative engineered specifically to **stream 4K local video files directly to YouTube Live** with NVIDIA hardware acceleration, 24/7 continuous looping, and **full remote control + direct video uploads from any smartphone** (iPhone & Android).
 
 ---
