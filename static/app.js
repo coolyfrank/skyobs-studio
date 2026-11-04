@@ -127,7 +127,14 @@ class SkyOBSApp {
 
   initEvents() {
     // Add Files & Folders
-    this.addFilesBtn.addEventListener('click', () => this.browseFiles());
+    this.addFilesBtn.addEventListener('click', () => {
+      // If accessing via web / cloud (Render, Colab, Cloudflare) or mobile, open device file selector directly
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' || window.innerWidth <= 768) {
+        this.mobileFileInput.click();
+      } else {
+        this.browseFiles();
+      }
+    });
     this.addFolderBtn.addEventListener('click', () => this.browseFolder());
     this.clearPlaylistBtn.addEventListener('click', () => this.clearPlaylist());
 
@@ -672,6 +679,8 @@ class SkyOBSApp {
         if (data.files && data.files.length > 0) {
           data.files.forEach(fileInfo => this.addVideoToPlaylist(fileInfo));
           this.saveCurrentConfig();
+        } else if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          this.mobileFileInput.click();
         }
       }
     } catch (e) {
@@ -697,6 +706,8 @@ class SkyOBSApp {
         if (data.files && data.files.length > 0) {
           data.files.forEach(fileInfo => this.addVideoToPlaylist(fileInfo));
           this.saveCurrentConfig();
+        } else if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          this.mobileFileInput.click();
         } else if (data.folder) {
           alert('No supported video files (.mp4, .mkv, .mov, .avi, .webm, .ts) found in that folder.');
         }
