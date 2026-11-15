@@ -302,11 +302,11 @@ class StreamEngine:
                 "-ar", "44100",
                 "-ac", "2"
             ])
-        elif encoder == "nvenc":
+        elif encoder in ["nvenc", "h264_nvenc"]:
             cmd.extend([
                 "-c:v", "h264_nvenc",
-                "-preset", "p4",
-                "-tune", "hq",
+                "-preset", "p2",
+                "-tune", "ll",
                 "-rc", "cbr",
                 "-b:v", f"{bitrate_kbps}k",
                 "-maxrate", f"{bitrate_kbps}k",

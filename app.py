@@ -177,8 +177,29 @@ async def upload_video(file: UploadFile = File(...)):
 
 @app.get("/api/config")
 def get_config():
-    """Returns saved configuration."""
+    """Returns saved configuration and automatically scans uploads/ for new files."""
     cfg = load_config()
+    
+    # Auto-discover any files manually placed in uploads directory
+    extensions = {".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".ts", ".wmv", ".m4v", ".mp3", ".m4a", ".wav", ".aac"}
+    discovered = []
+    if UPLOADS_DIR.exists():
+        for f in UPLOADS_DIR.iterdir():
+            if f.is_file() and f.suffix.lower() in extensions:
+                discovered.append(str(f.resolve()))
+    
+    # Merge discovered files so they appear automatically in the UI playlist
+    current_pl = cfg.get("recent_playlist", [])
+    merged = []
+    for item in current_pl + discovered:
+        if item not in merged and Path(item).exists():
+            merged.append(item)
+    if not merged and discovered:
+        merged = discovered
+        
+    cfg["recent_playlist"] = merged
+    save_config(cfg)
+    
     # Mask stream key for security in display, but allow full key usage
     masked_key = ""
     if cfg.get("stream_key"):
@@ -457,6 +478,35 @@ def start_server_and_ui():
         print(f"\n=======================================================")
         print(f"[+] SkyOBS Studio running in 24/7 Cloud Server Mode on port {port}")
         print(f"=======================================================\n")
+        
+        def auto_start_cloud_stream():
+            time.sleep(3)
+            cfg = load_config()
+            sk = cfg.get("stream_key", "").strip()
+            pl = cfg.get("recent_playlist", [])
+            resolved_pl = []
+            for f in pl:
+                p = Path(f)
+                if not p.is_absolute():
+                    p = BASE_DIR / f
+                if p.exists():
+                    resolved_pl.append(str(p.resolve()))
+            if sk and resolved_pl:
+                print(f"[+] Cloud Auto-Start: Launching 24/7 stream for {resolved_pl[0]}...", flush=True)
+                stream_engine.start_stream(
+                    playlist=resolved_pl,
+                    stream_key=sk,
+                    rtmp_url=cfg.get("rtmp_url", "rtmp://a.rtmp.youtube.com/live2"),
+                    loop_mode=cfg.get("loop_mode", "single"),
+                    resolution=cfg.get("resolution", "1080p"),
+                    target_fps=int(cfg.get("target_fps", 30)),
+                    bitrate_kbps=int(cfg.get("bitrate_kbps", 3000)),
+                    encoder="x264",
+                    audio_bitrate_kbps=int(cfg.get("audio_bitrate_kbps", 192)),
+                    overlay_text=cfg.get("overlay_text", "")
+                )
+
+        threading.Thread(target=auto_start_cloud_stream, daemon=True).start()
         uvicorn.run(app, host=host, port=port, log_level="info")
         return
 

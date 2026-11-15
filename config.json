@@ -1,14 +1,14 @@
 {
   "rtmp_url": "rtmp://a.rtmp.youtube.com/live2",
-  "stream_key": "test-4k-key",
+  "stream_key": "kk4u-tkew-hm21-6d16-65b6",
   "loop_mode": "single",
-  "resolution": "4k",
-  "target_fps": 60,
-  "bitrate_kbps": 30000,
-  "encoder": "hevc_nvenc",
-  "audio_bitrate_kbps": 192,
+  "resolution": "1080p",
+  "target_fps": 30,
+  "bitrate_kbps": 1500,
+  "encoder": "x264",
+  "audio_bitrate_kbps": 160,
   "overlay_text": "",
   "recent_playlist": [
-    "C:\\Users\\Richi\\OneDrive\\Desktop\\antigravity\\dancing_dog.mp4"
+    "skyking_album_master.mp4"
   ]
 }
