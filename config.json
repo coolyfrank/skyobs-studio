@@ -5,7 +5,7 @@
   "resolution": "1080p",
   "target_fps": 30,
   "bitrate_kbps": 1500,
-  "encoder": "x264",
+  "encoder": "copy",
   "audio_bitrate_kbps": 160,
   "overlay_text": "",
   "recent_playlist": [

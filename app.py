@@ -501,7 +501,7 @@ def start_server_and_ui():
                     resolution=cfg.get("resolution", "1080p"),
                     target_fps=int(cfg.get("target_fps", 30)),
                     bitrate_kbps=int(cfg.get("bitrate_kbps", 3000)),
-                    encoder="x264",
+                    encoder=cfg.get("encoder", "copy"),
                     audio_bitrate_kbps=int(cfg.get("audio_bitrate_kbps", 192)),
                     overlay_text=cfg.get("overlay_text", "")
                 )
