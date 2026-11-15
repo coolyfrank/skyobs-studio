@@ -1,6 +1,6 @@
 {
   "rtmp_url": "rtmp://a.rtmp.youtube.com/live2",
-  "stream_key": "kk4u-tkew-hm21-6d16-65b6",
+  "stream_key": "",
   "loop_mode": "single",
   "resolution": "1080p",
   "target_fps": 30,
